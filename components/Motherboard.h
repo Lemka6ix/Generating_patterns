@@ -2,7 +2,6 @@
 #define MOTHERBOARD_H
 
 #include "Component.h"
-#include "../core/PriceCatalog.h"
 #include <vector>
 
 class Motherboard : public Component {
@@ -14,26 +13,18 @@ private:
     int ramSlots;
     int pcieSlots;
     std::string formFactor;
-    std::vector<std::string> storageInterfaces;
     
 public:
-    Motherboard(const std::string& n, const std::string& s, const std::string& m,
-                const std::string& cs, const std::string& rt, int maxR, 
-                int rSlots, int pcie, const std::string& ff)
-        : Component(n, m), socket(s), chipset(cs), ramType(rt), maxRAM(maxR),
-          ramSlots(rSlots), pcieSlots(pcie), formFactor(ff) {
-        storageInterfaces = {"SATA", "NVMe"};
-    }
+    Motherboard(const std::string& n, double p, const std::string& m,
+                const std::string& s, const std::string& cs, const std::string& rt,
+                int maxR, int rSlots, int pcie, const std::string& ff)
+        : Component(n, p, m), socket(s), chipset(cs), ramType(rt), maxRAM(maxR),
+          ramSlots(rSlots), pcieSlots(pcie), formFactor(ff) {}
     
     Motherboard(const Motherboard& other)
         : Component(other), socket(other.socket), chipset(other.chipset),
           ramType(other.ramType), maxRAM(other.maxRAM), ramSlots(other.ramSlots),
-          pcieSlots(other.pcieSlots), formFactor(other.formFactor),
-          storageInterfaces(other.storageInterfaces) {}
-    
-    double getPrice() const override {
-        return PriceCatalog::getInstance()->getPrice(name);
-    }
+          pcieSlots(other.pcieSlots), formFactor(other.formFactor) {}
     
     std::string getSpecs() const override {
         return "Motherboard: " + name + " (" + socket + ", " + chipset + 
@@ -42,11 +33,9 @@ public:
     
     std::string getType() const override { return "Motherboard"; }
     
-    std::string getSocket() const override { return socket; }
+    std::string getSocket() const { return socket; }
     std::string getRAMType() const { return ramType; }
     int getMaxRAM() const { return maxRAM; }
-    int getRAMSlots() const { return ramSlots; }
-    std::string getFormFactor() const { return formFactor; }
 };
 
 #endif

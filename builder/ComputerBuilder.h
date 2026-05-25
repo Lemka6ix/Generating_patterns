@@ -18,10 +18,6 @@ public:
         delete computer;
     }
     
-    void setFactory(const ComponentFactory* f) {
-        factory = f;
-    }
-    
     virtual void buildComputerType() = 0;
     virtual void addCPU() {
         if (factory) computer->setCPU(factory->createCPU());
@@ -51,11 +47,6 @@ public:
         computer = new Computer();
         return result;
     }
-    
-    void reset() {
-        delete computer;
-        computer = new Computer();
-    }
 };
 
 class GamingPCBuilder : public ComputerBuilder {
@@ -68,12 +59,9 @@ public:
     }
     
     void addPeripherals() override {
-        computer->addPeripheral(new Peripheral("ASUS ROG Swift PG32UQX", "ASUS",
-                                               "Monitor", "DisplayPort"));
-        computer->addPeripheral(new Peripheral("Razer Huntsman V2", "Razer",
-                                               "Keyboard", "USB"));
-        computer->addPeripheral(new Peripheral("Logitech G502 X Plus", "Logitech",
-                                               "Mouse", "USB"));
+        computer->addPeripheral(new Peripheral("ASUS ROG Swift Monitor", 2800.0, "ASUS", "Monitor", "DisplayPort"));
+        computer->addPeripheral(new Peripheral("Razer Huntsman Keyboard", 200.0, "Razer", "Keyboard", "USB"));
+        computer->addPeripheral(new Peripheral("Logitech G502 Mouse", 150.0, "Logitech", "Mouse", "USB"));
     }
 };
 
@@ -95,12 +83,9 @@ public:
     }
     
     void addPeripherals() override {
-        computer->addPeripheral(new Peripheral("Dell UltraSharp U4323QE", "Dell",
-                                               "Monitor", "USB-C"));
-        computer->addPeripheral(new Peripheral("Logitech MX Mechanical", "Logitech",
-                                               "Keyboard", "Bluetooth"));
-        computer->addPeripheral(new Peripheral("Logitech MX Master 3S", "Logitech",
-                                               "Mouse", "Bluetooth"));
+        computer->addPeripheral(new Peripheral("Dell UltraSharp Monitor", 1150.0, "Dell", "Monitor", "USB-C"));
+        computer->addPeripheral(new Peripheral("Logitech MX Keyboard", 170.0, "Logitech", "Keyboard", "Bluetooth"));
+        computer->addPeripheral(new Peripheral("Logitech MX Master Mouse", 100.0, "Logitech", "Mouse", "Bluetooth"));
     }
 };
 
@@ -121,11 +106,8 @@ public:
         }
     }
     
-    void addGPU() override {
-    }
-    
-    void addPeripherals() override {
-    }
+    void addGPU() override {}
+    void addPeripherals() override {}
 };
 
 #endif

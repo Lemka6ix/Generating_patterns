@@ -3,8 +3,8 @@
 
 #include <map>
 #include <string>
-#include <iostream>
 #include <vector>
+#include <iostream>
 
 class PriceCatalog {
 private:
@@ -12,6 +12,8 @@ private:
     std::map<std::string, double> prices;
     
     PriceCatalog();
+    void loadDefaultPrices();
+    
     PriceCatalog(const PriceCatalog&) = delete;
     PriceCatalog& operator=(const PriceCatalog&) = delete;
     
@@ -22,7 +24,6 @@ public:
     void setPrice(const std::string& componentName, double price);
     double getPrice(const std::string& componentName) const;
     bool hasPrice(const std::string& componentName) const;
-    void loadDefaultPrices();
     void printCatalog() const;
     double calculateTotalCost(const std::vector<std::string>& components) const;
 };

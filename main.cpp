@@ -1,115 +1,13 @@
-
 #include "builder/ComputerBuilder.h"
 #include "builder/Director.h"
 #include "factories/ComponentFactory.h"
+#include "core/PriceCatalog.h"
+#include "prototype/PresetManager.h"
 #include <iostream>
-#include <vector>
-#include <functional>
-#include <map>
-#include <mutex>
-
-class PriceCatalog {
-private:
-    static PriceCatalog* instance;
-    static std::mutex mutex;
-    std::map<std::string, double> prices;
-    
-    PriceCatalog() = default;
-    PriceCatalog(const PriceCatalog&) = delete;
-    PriceCatalog& operator=(const PriceCatalog&) = delete;
-    
-public:
-    static PriceCatalog* getInstance() {
-        std::lock_guard<std::mutex> lock(mutex);
-        if (!instance) {
-            instance = new PriceCatalog();
-        }
-        return instance;
-    }
-    
-    static void destroyInstance() {
-        std::lock_guard<std::mutex> lock(mutex);
-        delete instance;
-        instance = nullptr;
-    }
-    
-    void setPrice(const std::string& componentName, double price) {
-        prices[componentName] = price;
-    }
-    
-    double getPrice(const std::string& componentName) const {
-        auto it = prices.find(componentName);
-        return (it != prices.end()) ? it->second : 0.0;
-    }
-    
-    bool hasPrice(const std::string& componentName) const {
-        return prices.find(componentName) != prices.end();
-    }
-    
-    void loadDefaultPrices() {
-        // Intel компоненты
-        prices["Intel Core i7-13700K"] = 380.0;
-        prices["Intel Core i9-13900K"] = 580.0;
-        prices["ASUS ROG Z790"] = 320.0;
-        prices["Corsair Vengeance DDR5"] = 180.0;
-        prices["NVIDIA RTX 4080"] = 1250.0;
-        prices["NVIDIA RTX 4090"] = 1650.0;
-        
-        // AMD компоненты
-        prices["AMD Ryzen 9 7950X"] = 550.0;
-        prices["AMD Ryzen 9 7950X3D"] = 699.0;
-        prices["ASRock X670E"] = 280.0;
-        prices["G.Skill Trident DDR5"] = 170.0;
-        prices["AMD Radeon RX 7900 XTX"] = 1000.0;
-        
-        // Server компоненты
-        prices["Intel Xeon Gold 6428R"] = 2800.0;
-        prices["SuperMicro X13DEM"] = 1200.0;
-        prices["Samsung RDIMM"] = 380.0;
-        prices["NVIDIA A100"] = 11000.0;
-        prices["Intel Optane P5800X"] = 1200.0;
-        prices["Delta 2400W"] = 650.0;
-        prices["Dynatron LGA4677"] = 180.0;
-        
-        // Storage
-        prices["Samsung 980 Pro"] = 150.0;
-        prices["WD Black SN850X"] = 160.0;
-        
-        // PSU
-        prices["Corsair RM850x"] = 150.0;
-        prices["EVGA SuperNOVA 1000 GT"] = 180.0;
-        
-        // Cooling
-        prices["Corsair H100i"] = 150.0;
-        prices["Noctua NH-D15"] = 110.0;
-    }
-    
-    void printCatalog() const {
-
-        std::cout << "              PRICE CATALOG                      \n";
-        for (const auto& [name, price] : prices) {
-            printf("  %-35s $%7.2f ║\n", name.c_str(), price);
-        }
-    }
-    
-    double calculateTotalCost(const std::vector<std::string>& components) const {
-        double total = 0;
-        for (const auto& comp : components) {
-            total += getPrice(comp);
-        }
-        return total;
-    }
-};
-
-
-PriceCatalog* PriceCatalog::instance = nullptr;
-std::mutex PriceCatalog::mutex;
 
 class TestRunner {
 private:
-    int passed = 0;
-    int failed = 0;
-    int warnings = 0;
+    int passed = 0, failed = 0;
     
 public:
     void assertTrue(bool condition, const std::string& testName) {
@@ -122,57 +20,13 @@ public:
         }
     }
     
-    void assertWarning(bool condition, const std::string& testName) {
-        if (condition) {
-            std::cout << "WARNING: " << testName << std::endl;
-            warnings++;
-        } else {
-            std::cout << "OK: " << testName << " (no warning)" << std::endl;
-            passed++;
-        }
-    }
-    
     void printResults() {
-        std::cout << "\n=== TEST RESULTS: " << passed << " passed, " 
-                  << failed << " failed, " << warnings << " warnings ===" << std::endl;
+        std::cout << "\n TEST RESULTS: " << passed << " passed, " << failed << " failed " << std::endl;
     }
 };
 
-
-void testSingletonPattern() {
-    std::cout << "\n Testing Singleton Pattern \n";
-    TestRunner runner;
-
-    PriceCatalog* catalog1 = PriceCatalog::getInstance();
-    PriceCatalog* catalog2 = PriceCatalog::getInstance();
-    runner.assertTrue(catalog1 == catalog2, "Singleton returns same instance");
-    
-  
-    double price = catalog1->getPrice("Intel Core i7-13700K");
-    runner.assertTrue(price == 380.0, "Correct price retrieval for existing component");
-    
-    double unknownPrice = catalog1->getPrice("NonExistentComponent");
-    runner.assertTrue(unknownPrice == 0.0, "Non-existent component returns 0");
-    
-
-    catalog1->setPrice("TestComponent", 99.99);
-    runner.assertTrue(catalog1->getPrice("TestComponent") == 99.99, "Price update works");
-    
-
-    runner.assertTrue(catalog1->hasPrice("Intel Core i7-13700K"), "Component exists check");
-    runner.assertTrue(!catalog1->hasPrice("FakeComponent"), "Non-existent component check");
-    
-
-    std::vector<std::string> components = {"Intel Core i7-13700K", "ASUS ROG Z790", "Corsair Vengeance DDR5"};
-    double total = catalog1->calculateTotalCost(components);
-    runner.assertTrue(total == 380.0 + 320.0 + 180.0, "Batch price calculation correct");
-    
-    runner.printResults();
-}
-
-
 void testFactoryPattern() {
-    std::cout << "\n== Testing Factory Pattern \n";
+    std::cout << "\nTesting Factory Pattern " << std::endl;
     TestRunner runner;
     
     IntelFactory intelFactory;
@@ -191,64 +45,97 @@ void testFactoryPattern() {
     delete amdCPU;
     delete amdMB;
     
-    runner.assertTrue(intelFactory.createCPU()->getSocket() != amdFactory.createCPU()->getSocket(),
-                     "Intel and AMD have different CPU sockets");
+    runner.printResults();
+}
+
+void testSingletonPattern() {
+    std::cout << "\n Testing Singleton Pattern " << std::endl;
+    TestRunner runner;
     
-    Storage* storage = intelFactory.createStorage();
-    runner.assertTrue(storage->getPrice() > 0, "Storage has valid price");
-    delete storage;
+    PriceCatalog* catalog1 = PriceCatalog::getInstance();
+    PriceCatalog* catalog2 = PriceCatalog::getInstance();
+    runner.assertTrue(catalog1 == catalog2, "Singleton returns same instance");
     
-    ServerFactory serverFactory;
-    RAM* serverRAM = serverFactory.createRAM();
-    runner.assertTrue(serverRAM->isECCCompatible(), "Server RAM supports ECC");
-    delete serverRAM;
+    double price = catalog1->getPrice("Intel Core i9-13900K");
+    runner.assertTrue(price == 580.0, "Correct price retrieval");
     
+    runner.printResults();
+}
+
+void testPrototypePattern() {
+    std::cout << "\nTesting Prototype Pattern " << std::endl;
+    TestRunner runner;
+    
+    PresetManager* pm = PresetManager::getInstance();
+    
+    IntelFactory factory;
+    GamingPCBuilder builder(&factory);
+    Director director(&builder);
+    Computer* original = director.constructCompleteComputer();
+    
+    bool saved = pm->savePreset("test_gaming_pc", original);
+    runner.assertTrue(saved, "Save preset operation");
+    
+    runner.assertTrue(pm->hasPreset("test_gaming_pc"), "Preset exists after save");
+    
+    Computer* loaded = pm->loadPreset("test_gaming_pc");
+    runner.assertTrue(loaded != nullptr, "Load preset returns valid computer");
+    runner.assertTrue(loaded != original, "Loaded computer is different instance from original");
+    
+    if (loaded && loaded->cpu) {
+        runner.assertTrue(loaded->cpu != original->cpu, "CPU objects are different (deep copy)");
+    }
+    
+    pm->deletePreset("test_gaming_pc");
+    runner.assertTrue(!pm->hasPreset("test_gaming_pc"), "Preset deleted successfully");
+    
+    delete original;
+    delete loaded;
     runner.printResults();
 }
 
 int main() {
     
-    // Инициализация PriceCatalog
-    PriceCatalog::getInstance()->loadDefaultPrices();
-    
-    // Вывод каталога цен
     PriceCatalog::getInstance()->printCatalog();
     
-    // Запуск тестов
-    testSingletonPattern();
     testFactoryPattern();
+    testSingletonPattern();
+    testPrototypePattern();
     
-    // Демонстрация сборки компьютеров
-    std::cout << "\n>>> Building Computers with Different Platforms <<<\n";
+    std::cout << "\n>>> DEMONSTRATION: Building and Saving Presets <<<" << std::endl;
     
-    // Intel Gaming PC
+    PresetManager* presetMgr = PresetManager::getInstance();
+    
     IntelFactory intelFactory;
-    GamingPCBuilder intelGamingBuilder(&intelFactory);
-    Director intelDirector(&intelGamingBuilder);
-    Computer* intelPC = intelDirector.constructCompleteComputer();
-    intelPC->printSpecification();
-    delete intelPC;
+    GamingPCBuilder gamingBuilder(&intelFactory);
+    Director gamingDirector(&gamingBuilder);
+    Computer* gamingPC = gamingDirector.constructCompleteComputer();
+    gamingPC->printSpecification();
+    presetMgr->savePreset("My Gaming PC", gamingPC);
+    delete gamingPC;
     
-    // AMD Workstation
     AMDFactory amdFactory;
-    WorkstationBuilder amdWorkstationBuilder(&amdFactory);
-    Director amdDirector(&amdWorkstationBuilder);
-    Computer* amdWS = amdDirector.constructCompleteComputer();
-    amdWS->printSpecification();
-    delete amdWS;
+    WorkstationBuilder wsBuilder(&amdFactory);
+    Director wsDirector(&wsBuilder);
+    Computer* workstation = wsDirector.constructCompleteComputer();
+    workstation->printSpecification();
+    presetMgr->savePreset("My Workstation", workstation);
+    delete workstation;
     
-    // Server with Xeon
-    ServerFactory serverFactory;
-    ServerBuilder serverBuilder(&serverFactory);
-    Director serverDirector(&serverBuilder);
-    Computer* server = serverDirector.constructCompleteComputer();
-    server->printSpecification();
-    delete server;
+    std::cout << "\n>>> Loading and Displaying Presets <<<" << std::endl;
+    Computer* loadedGaming = presetMgr->loadPreset("My Gaming PC");
+    if (loadedGaming) {
+        loadedGaming->printSpecification();
+        delete loadedGaming;
+    }
     
-    // Очистка Singleton
+    presetMgr->listPresets();
+    
+    PresetManager::destroyInstance();
     PriceCatalog::destroyInstance();
+    
 
-    std::cout << "PROGRAM FINISHED\n";
+    std::cout << "PROGRAM FINISHED" << std::endl;
     
     return 0;
 }

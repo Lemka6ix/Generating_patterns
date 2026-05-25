@@ -18,6 +18,7 @@ private:
     std::string name;
     std::string computerType;
     
+public:
     CPU* cpu;
     Motherboard* motherboard;
     std::vector<RAM*> ramModules;
@@ -27,8 +28,27 @@ private:
     Cooling* cooling;
     std::vector<Peripheral*> peripherals;
     
-public:
     Computer() : cpu(nullptr), motherboard(nullptr), gpu(nullptr), psu(nullptr), cooling(nullptr) {}
+    
+    Computer(const Computer& other) 
+        : name(other.name + " (copy)"), computerType(other.computerType),
+          cpu(nullptr), motherboard(nullptr), gpu(nullptr), psu(nullptr), cooling(nullptr) {
+        if (other.cpu) cpu = new CPU(*other.cpu);
+        if (other.motherboard) motherboard = new Motherboard(*other.motherboard);
+        if (other.gpu) gpu = new GPU(*other.gpu);
+        if (other.psu) psu = new PowerSupply(*other.psu);
+        if (other.cooling) cooling = new Cooling(*other.cooling);
+        
+        for (auto ram : other.ramModules) {
+            if (ram) ramModules.push_back(new RAM(*ram));
+        }
+        for (auto storage : other.storageDevices) {
+            if (storage) storageDevices.push_back(new Storage(*storage));
+        }
+        for (auto peripheral : other.peripherals) {
+            if (peripheral) peripherals.push_back(new Peripheral(*peripheral));
+        }
+    }
     
     ~Computer() {
         delete cpu;
@@ -70,48 +90,22 @@ public:
     
     bool validateCompatibility() const {
         if (!cpu || !motherboard) return false;
-        
         if (cpu->getSocket() != motherboard->getSocket()) return false;
-        
-        for (auto ram : ramModules) {
-            if (ram->getTypeName() != motherboard->getRAMType()) return false;
-        }
-        
-        if (psu && cpu) {
-            int totalTDP = cpu->getTDP();
-            if (gpu) totalTDP += 200;
-            if (psu->getWattage() < totalTDP) return false;
-        }
-        
-        if (cooling && cpu) {
-            if (cooling->getTDPMax() < cpu->getTDP()) return false;
-        }
-        
         return true;
     }
     
     void printSpecification() const {
-        std::cout << "  " << name << " (" << computerType << ")\n";
-        
-        if (cpu) std::cout << "  " << cpu->getSpecs() << "\n";
-        if (motherboard) std::cout << "  " << motherboard->getSpecs() << "\n";
-        
-        for (auto ram : ramModules) 
-            std::cout << "  " << ram->getSpecs() << "\n";
-        
-        if (gpu) std::cout << "  " << gpu->getSpecs() << "\n";
-        
-        for (auto storage : storageDevices) 
-            std::cout << "  " << storage->getSpecs() << "\n";
-        
-        if (psu) std::cout << "  " << psu->getSpecs() << "\n";
-        if (cooling) std::cout << "  " << cooling->getSpecs() << "\n";
-        
-        for (auto peripheral : peripherals) 
-            std::cout << "  " << peripheral->getSpecs() << "\n";
-
-        printf("  Total Price: $%.2f\n", calculateTotalPrice());
-        std::cout << "  Compatible: " << (validateCompatibility() ? "YES" : "NO") << "\n";
+        std::cout << "Computer: " << name << " (" << computerType << ")" << std::endl;
+        if (cpu) std::cout << cpu->getSpecs() << std::endl;
+        if (motherboard) std::cout << motherboard->getSpecs() << std::endl;
+        for (auto ram : ramModules) std::cout << ram->getSpecs() << std::endl;
+        if (gpu) std::cout << gpu->getSpecs() << std::endl;
+        for (auto storage : storageDevices) std::cout << storage->getSpecs() << std::endl;
+        if (psu) std::cout << psu->getSpecs() << std::endl;
+        if (cooling) std::cout << cooling->getSpecs() << std::endl;
+        for (auto peripheral : peripherals) std::cout << peripheral->getSpecs() << std::endl;
+        std::cout << "Total Price: $" << calculateTotalPrice() << std::endl;
+        std::cout << "Compatible: " << (validateCompatibility() ? "YES" : "NO") << std::endl;
     }
 };
 

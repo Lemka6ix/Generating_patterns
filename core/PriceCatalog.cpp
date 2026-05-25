@@ -1,4 +1,6 @@
 #include "PriceCatalog.h"
+#include <iostream>
+#include <cstdio>
 
 PriceCatalog* PriceCatalog::instance = nullptr;
 
@@ -78,9 +80,9 @@ void PriceCatalog::loadDefaultPrices() {
 }
 
 void PriceCatalog::printCatalog() const {
-    std::cout << "              PRICE CATALOG                      \n";
+    std::cout << "           PRICE CATALOG\n";
     for (const auto& [name, price] : prices) {
-        printf("║  %-35s $%8.2f ║\n", name.c_str(), price);
+        std::cout << name << ": $" << price << std::endl;
     }
 }
 
