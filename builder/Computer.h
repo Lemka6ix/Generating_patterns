@@ -52,6 +52,9 @@ public:
     void setCooling(Cooling* c) { cooling = c; }
     void addPeripheral(Peripheral* p) { peripherals.push_back(p); }
     
+    std::string getName() const { return name; }
+    std::string getType() const { return computerType; }
+    
     double calculateTotalPrice() const {
         double total = 0;
         if (cpu) total += cpu->getPrice();
@@ -68,21 +71,18 @@ public:
     bool validateCompatibility() const {
         if (!cpu || !motherboard) return false;
         
- 
         if (cpu->getSocket() != motherboard->getSocket()) return false;
         
-
         for (auto ram : ramModules) {
             if (ram->getTypeName() != motherboard->getRAMType()) return false;
         }
-
+        
         if (psu && cpu) {
             int totalTDP = cpu->getTDP();
-            if (gpu) totalTDP += 200; 
+            if (gpu) totalTDP += 200;
             if (psu->getWattage() < totalTDP) return false;
         }
         
-
         if (cooling && cpu) {
             if (cooling->getTDPMax() < cpu->getTDP()) return false;
         }
@@ -91,8 +91,7 @@ public:
     }
     
     void printSpecification() const {
-        std::cout << " " << name << " (" << computerType << ")\n";
-
+        std::cout << "  " << name << " (" << computerType << ")\n";
         
         if (cpu) std::cout << "  " << cpu->getSpecs() << "\n";
         if (motherboard) std::cout << "  " << motherboard->getSpecs() << "\n";
@@ -110,7 +109,8 @@ public:
         
         for (auto peripheral : peripherals) 
             std::cout << "  " << peripheral->getSpecs() << "\n";
-        std::cout << "  Total Price: $" << calculateTotalPrice() << "\n";
+
+        printf("  Total Price: $%.2f\n", calculateTotalPrice());
         std::cout << "  Compatible: " << (validateCompatibility() ? "YES" : "NO") << "\n";
     }
 };

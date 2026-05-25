@@ -2,6 +2,7 @@
 #define POWERSUPPLY_H
 
 #include "Component.h"
+#include "../core/PriceCatalog.h"
 
 class PowerSupply : public Component {
 private:
@@ -10,9 +11,17 @@ private:
     bool isModular;
     
 public:
-    PowerSupply(const std::string& n, double p, const std::string& m,
-                int watts, const std::string& eff, bool modular)
-        : Component(n, p, m), wattage(watts), efficiency(eff), isModular(modular) {}
+    PowerSupply(const std::string& n, const std::string& m, int watts, 
+                const std::string& eff, bool modular)
+        : Component(n, m), wattage(watts), efficiency(eff), isModular(modular) {}
+    
+    PowerSupply(const PowerSupply& other)
+        : Component(other), wattage(other.wattage), efficiency(other.efficiency),
+          isModular(other.isModular) {}
+    
+    double getPrice() const override {
+        return PriceCatalog::getInstance()->getPrice(name);
+    }
     
     std::string getSpecs() const override {
         return "PSU: " + name + " (" + std::to_string(wattage) + "W, " + efficiency +
