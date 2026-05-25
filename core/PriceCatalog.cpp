@@ -1,13 +1,27 @@
+/**
+ * @file PriceCatalog.cpp
+ * @brief Реализация класса PriceCatalog
+ * @details Содержит реализацию методов синглтона PriceCatalog.
+ *          Инициализирует цены по умолчанию для популярных компонентов.
+ */
+#include <iomanip>
 #include "PriceCatalog.h"
-#include <iostream>
 #include <cstdio>
 
+/// Инициализация статического члена класса
 PriceCatalog* PriceCatalog::instance = nullptr;
 
+/**
+ * @brief Приватный конструктор, загружает цены по умолчанию
+ */
 PriceCatalog::PriceCatalog() {
     loadDefaultPrices();
 }
 
+/**
+ * @brief Получение единственного экземпляра (ленивая инициализация)
+ * @return Указатель на экземпляр PriceCatalog
+ */
 PriceCatalog* PriceCatalog::getInstance() {
     if (!instance) {
         instance = new PriceCatalog();
@@ -15,41 +29,68 @@ PriceCatalog* PriceCatalog::getInstance() {
     return instance;
 }
 
+/**
+ * @brief Уничтожение экземпляра и освобождение памяти
+ */
 void PriceCatalog::destroyInstance() {
     delete instance;
     instance = nullptr;
 }
 
+/**
+ * @brief Установка цены для компонента
+ * @param componentName Название компонента
+ * @param price Цена в долларах
+ */
 void PriceCatalog::setPrice(const std::string& componentName, double price) {
     prices[componentName] = price;
 }
 
+/**
+ * @brief Получение цены компонента
+ * @param componentName Название компонента
+ * @return Цена в долларах или 0.0
+ */
 double PriceCatalog::getPrice(const std::string& componentName) const {
     auto it = prices.find(componentName);
     return (it != prices.end()) ? it->second : 0.0;
 }
 
+/**
+ * @brief Проверка наличия цены
+ * @param componentName Название компонента
+ * @return true если цена существует
+ */
 bool PriceCatalog::hasPrice(const std::string& componentName) const {
     return prices.find(componentName) != prices.end();
 }
 
+/**
+ * @brief Загрузка цен по умолчанию для всех компонентов
+ */
 void PriceCatalog::loadDefaultPrices() {
-    // Intel компоненты
+    // Процессоры Intel
     prices["Intel Core i7-13700K"] = 380.0;
     prices["Intel Core i9-13900K"] = 580.0;
-    prices["ASUS ROG Z790"] = 520.0;
-    prices["Corsair Vengeance DDR5"] = 180.0;
-    prices["NVIDIA RTX 4080"] = 1250.0;
-    prices["NVIDIA RTX 4090"] = 1650.0;
     
-    // AMD компоненты
+    // Процессоры AMD
     prices["AMD Ryzen 9 7950X"] = 550.0;
     prices["AMD Ryzen 9 7950X3D"] = 699.0;
+    
+    // Материнские платы
+    prices["ASUS ROG Z790"] = 520.0;
     prices["ASRock X670E Taichi"] = 480.0;
+    
+    // Оперативная память
+    prices["Corsair Vengeance DDR5"] = 180.0;
     prices["G.Skill Trident Z5"] = 190.0;
+    
+    // Видеокарты
+    prices["NVIDIA RTX 4080"] = 1250.0;
+    prices["NVIDIA RTX 4090"] = 1650.0;
     prices["AMD Radeon RX 7900 XTX"] = 1000.0;
     
-    // Server компоненты
+    // Серверные компоненты
     prices["Intel Xeon Gold 6428R"] = 2800.0;
     prices["SuperMicro X13DEM"] = 1200.0;
     prices["Samsung RDIMM"] = 380.0;
@@ -58,19 +99,19 @@ void PriceCatalog::loadDefaultPrices() {
     prices["Delta 2400W"] = 650.0;
     prices["Dynatron LGA4677"] = 180.0;
     
-    // Storage
+    // Накопители
     prices["Samsung 980 Pro"] = 150.0;
     prices["WD Black SN850X"] = 160.0;
     
-    // PSU
+    // Блоки питания
     prices["Corsair RM850x"] = 150.0;
     prices["EVGA SuperNOVA 1000 GT"] = 180.0;
     
-    // Cooling
+    // Системы охлаждения
     prices["Corsair H100i"] = 150.0;
     prices["Noctua NH-D15"] = 110.0;
     
-    // Peripherals
+    // Периферия
     prices["ASUS ROG Swift PG32UQX"] = 2800.0;
     prices["Razer Huntsman V2"] = 200.0;
     prices["Logitech G502 X Plus"] = 150.0;
@@ -79,13 +120,21 @@ void PriceCatalog::loadDefaultPrices() {
     prices["Logitech MX Master 3S"] = 100.0;
 }
 
+/**
+ * @brief Вывод каталога цен в консоль
+ */
 void PriceCatalog::printCatalog() const {
-    std::cout << "           PRICE CATALOG\n";
-    for (const auto& [name, price] : prices) {
-        std::cout << name << ": $" << price << std::endl;
+    std::cout << "\nPRICE CATALOG:" << std::endl;
+    for (const auto& pair : prices) {
+        std::cout << std::left << std::setw(35) << pair.first 
+                  << " $" << std::fixed << std::setprecision(2) << pair.second << std::endl;
     }
 }
-
+/**
+ * @brief Расчёт общей стоимости списка компонентов
+ * @param components Вектор названий компонентов
+ * @return Суммарная цена
+ */
 double PriceCatalog::calculateTotalCost(const std::vector<std::string>& components) const {
     double total = 0;
     for (const auto& comp : components) {

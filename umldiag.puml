@@ -1,0 +1,338 @@
+@startuml Computer Configurator
+title Диаграмма классов - Computer Configurator
+
+abstract class Component {
+    # name : string
+    # price : double
+    # manufacturer : string
+    + getName() : string
+    + getPrice() : double
+    + getManufacturer() : string
+    + {abstract} getSpecs() : string
+    + {abstract} getType() : string
+    + setPrice(p : double) : void
+}
+
+class CPU {
+    - cores : int
+    - frequency : double
+    - socket : string
+    - tdp : int
+    - hasIntegratedGraphics : bool
+    + getSpecs() : string
+    + getType() : string
+    + getSocket() : string
+    + getCores() : int
+    + getFrequency() : double
+    + getTDP() : int
+    + {static} getIntelCPUs() : CPU[]
+    + {static} printIntelCPUs() : void
+    + {static} getIntelCPUByIndex(idx : int) : CPU
+    + {static} getAMDCPUs() : CPU[]
+    + {static} printAMDCPUs() : void
+    + {static} getAMDCPUByIndex(idx : int) : CPU
+    + {static} getServerCPUs() : CPU[]
+    + {static} printServerCPUs() : void
+    + {static} getServerCPUByIndex(idx : int) : CPU
+}
+
+class Motherboard {
+    - socket : string
+    - chipset : string
+    - ramType : string
+    - maxRAM : int
+    - ramSlots : int
+    - pcieSlots : int
+    - formFactor : string
+    + getSpecs() : string
+    + getType() : string
+    + getSocket() : string
+    + getRAMType() : string
+    + getMaxRAM() : int
+    + {static} getIntelMotherboards() : Motherboard[]
+    + {static} printIntelMotherboards() : void
+    + {static} getIntelMotherboardByIndex(idx : int) : Motherboard
+    + {static} getAMDMotherboards() : Motherboard[]
+    + {static} printAMDMotherboards() : void
+    + {static} getAMDMotherboardByIndex(idx : int) : Motherboard
+    + {static} getServerMotherboards() : Motherboard[]
+    + {static} printServerMotherboards() : void
+    + {static} getServerMotherboardByIndex(idx : int) : Motherboard
+}
+
+class RAM {
+    - sizeGB : int
+    - type : string
+    - frequency : int
+    - isECC : bool
+    + getSpecs() : string
+    + getType() : string
+    + getSize() : int
+    + getTypeName() : string
+    + isECCCompatible() : bool
+    + {static} getRAMs() : RAM[]
+    + {static} printRAMs() : void
+    + {static} getRAMByIndex(idx : int) : RAM
+}
+
+class GPU {
+    - vramGB : int
+    - vramType : string
+    - cudaCores : int
+    - isProfessional : bool
+    + getSpecs() : string
+    + getType() : string
+    + getVRAM() : int
+    + {static} getGPUs() : GPU[]
+    + {static} printGPUs() : void
+    + {static} getGPUByIndex(idx : int) : GPU
+}
+
+class Storage {
+    - capacityGB : int
+    - type : string
+    - readSpeed : int
+    - writeSpeed : int
+    + getSpecs() : string
+    + getType() : string
+    + getStorageType() : string
+    + getCapacity() : int
+    + {static} getStorages() : Storage[]
+    + {static} printStorages() : void
+    + {static} getStorageByIndex(idx : int) : Storage
+}
+
+class PowerSupply {
+    - wattage : int
+    - efficiency : string
+    - isModular : bool
+    + getSpecs() : string
+    + getType() : string
+    + getWattage() : int
+    + {static} getPowerSupplies() : PowerSupply[]
+    + {static} printPSUs() : void
+    + {static} getPSUByIndex(idx : int) : PowerSupply
+}
+
+class Cooling {
+    - type : string
+    - tdpCapacity : int
+    - fanCount : int
+    + getSpecs() : string
+    + getType() : string
+    + getTDPMax() : int
+    + {static} getCoolings() : Cooling[]
+    + {static} printCoolings() : void
+    + {static} getCoolingByIndex(idx : int) : Cooling
+}
+
+class Peripheral {
+    - deviceType : string
+    - connection : string
+    + getSpecs() : string
+    + getType() : string
+    + getDeviceType() : string
+}
+
+' Наследование от Component
+Component <|-- CPU
+Component <|-- Motherboard
+Component <|-- RAM
+Component <|-- GPU
+Component <|-- Storage
+Component <|-- PowerSupply
+Component <|-- Cooling
+Component <|-- Peripheral
+
+interface ICloneable {
+    + clone() : ICloneable
+}
+
+class Computer {
+    - name : string
+    - computerType : string
+    + cpu : CPU
+    + motherboard : Motherboard
+    + ramModules : RAM[]
+    + gpu : GPU
+    + storageDevices : Storage[]
+    + psu : PowerSupply
+    + cooling : Cooling
+    + peripherals : Peripheral[]
+    + Computer()
+    + Computer(const Computer&)
+    + ~Computer()
+    + clone() : ICloneable
+    + setName(n : string) : void
+    + setType(t : string) : void
+    + setCPU(c : CPU) : void
+    + setMotherboard(m : Motherboard) : void
+    + addRAM(r : RAM) : void
+    + setGPU(g : GPU) : void
+    + addStorage(s : Storage) : void
+    + setPSU(p : PowerSupply) : void
+    + setCooling(c : Cooling) : void
+    + addPeripheral(p : Peripheral) : void
+    + getName() : string
+    + getType() : string
+    + calculateTotalPrice() : double
+    + validateCompatibility() : bool
+    + printSpecification() : void
+}
+
+' Наследование интерфейса
+ICloneable <|.. Computer
+
+abstract class ComputerBuilder {
+    # computer : Computer
+    # factory : ComponentFactory
+    + {abstract} buildComputerType() : void
+    + addCPU() : void
+    + addMotherboard() : void
+    + addRAM() : void
+    + addGPU() : void
+    + addStorage() : void
+    + addPowerSupply() : void
+    + addCooling() : void
+    + {abstract} addPeripherals() : void
+    + getComputer() : Computer
+}
+
+class GamingPCBuilder {
+    + buildComputerType() : void
+    + addPeripherals() : void
+}
+
+class WorkstationBuilder {
+    + buildComputerType() : void
+    + addRAM() : void
+    + addPeripherals() : void
+}
+
+class ServerBuilder {
+    + buildComputerType() : void
+    + addRAM() : void
+    + addGPU() : void
+    + addPeripherals() : void
+}
+
+class Director {
+    - builder : ComputerBuilder
+    + Director(b : ComputerBuilder)
+    + constructCompleteComputer() : Computer
+}
+
+' Наследование строителей
+ComputerBuilder <|-- GamingPCBuilder
+ComputerBuilder <|-- WorkstationBuilder
+ComputerBuilder <|-- ServerBuilder
+
+' Агрегация (Director использует Builder)
+Director o--> ComputerBuilder
+
+interface ComponentFactory {
+    + createCPU() : CPU
+    + createMotherboard() : Motherboard
+    + createRAM() : RAM
+    + createGPU() : GPU
+    + createStorage() : Storage
+    + createPowerSupply() : PowerSupply
+    + createCooling() : Cooling
+    + getPlatformName() : string
+}
+
+class IntelFactory {
+    + createCPU() : CPU
+    + createMotherboard() : Motherboard
+    + createRAM() : RAM
+    + createGPU() : GPU
+    + createStorage() : Storage
+    + createPowerSupply() : PowerSupply
+    + createCooling() : Cooling
+    + getPlatformName() : string
+}
+
+class AMDFactory {
+    + createCPU() : CPU
+    + createMotherboard() : Motherboard
+    + createRAM() : RAM
+    + createGPU() : GPU
+    + createStorage() : Storage
+    + createPowerSupply() : PowerSupply
+    + createCooling() : Cooling
+    + getPlatformName() : string
+}
+
+class ServerFactory {
+    + createCPU() : CPU
+    + createMotherboard() : Motherboard
+    + createRAM() : RAM
+    + createGPU() : GPU
+    + createStorage() : Storage
+    + createPowerSupply() : PowerSupply
+    + createCooling() : Cooling
+    + getPlatformName() : string
+}
+
+' Наследование фабрик
+ComponentFactory <|.. IntelFactory
+ComponentFactory <|.. AMDFactory
+ComponentFactory <|.. ServerFactory
+
+class PriceCatalog {
+    - instance : PriceCatalog
+    - prices : map<string, double>
+    - PriceCatalog()
+    - loadDefaultPrices() : void
+    + {static} getInstance() : PriceCatalog
+    + {static} destroyInstance() : void
+    + setPrice(name : string, price : double) : void
+    + getPrice(name : string) : double
+    + hasPrice(name : string) : bool
+    + printCatalog() : void
+    + calculateTotalCost(components : string[]) : double
+}
+
+class PresetManager {
+    - instance : PresetManager
+    - presets : map<string, Computer>
+    - PresetManager()
+    + {static} getInstance() : PresetManager
+    + {static} destroyInstance() : void
+    + ~PresetManager()
+    + savePreset(name : string, computer : Computer) : bool
+    + savePresetSilent(name : string, computer : Computer) : bool
+    + loadPreset(name : string) : Computer
+    + listPresets() : void
+    + deletePreset(name : string) : void
+    + hasPreset(name : string) : bool
+    + getAllPresetNames() : string[]
+}
+
+' Отношения между классами
+
+' Композиция (Computer состоит из компонентов - сильное владение)
+Computer *-- CPU
+Computer *-- Motherboard
+Computer *-- GPU
+Computer *-- PowerSupply
+Computer *-- Cooling
+
+' Агрегация (слабое владение - компоненты могут существовать отдельно)
+Computer o-- RAM
+Computer o-- Storage
+Computer o-- Peripheral
+
+' Строитель создаёт Computer
+ComputerBuilder --> Computer : creates
+
+' Director использует Builder
+Director ..> ComputerBuilder : uses
+
+' Builder использует Factory
+ComputerBuilder ..> ComponentFactory : uses
+
+' PresetManager использует Computer через клонирование
+PresetManager ..> Computer : clones
+
+@enduml
